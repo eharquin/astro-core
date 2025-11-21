@@ -2,7 +2,7 @@
 include(FetchContent)
 
 # -------------------------
-# Macro to fetch & link GLFW
+# Function to fetch & link GLFW
 # -------------------------
 function(FetchLinkGLFW TARGET ACCESS)
 

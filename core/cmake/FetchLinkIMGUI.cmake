@@ -2,7 +2,7 @@
 include(FetchContent)
 
 # -------------------------
-# Macro to fetch & link IMGUI
+# Function to fetch & link IMGUI
 # -------------------------
 function(FetchLinkIMGUI TARGET ACCESS)
 

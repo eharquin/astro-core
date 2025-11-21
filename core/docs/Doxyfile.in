@@ -1,0 +1,27 @@
+@INCLUDE_PATH = @PROJECT_SOURCE_DIR@
+@INCLUDE      = @PROJECT_SOURCE_DIR@/docs/Doxyfile_common
+
+PROJECT_NAME        = "@PROJECT_NAME@"
+OUTPUT_DIRECTORY    = "@PROJECT_BINARY_DIR@/docs"
+
+# --- FIXED: INPUT must NOT be quoted as one string ---
+# --- And paths must be separated with spaces (unquoted) or '\' on multiple lines ---
+INPUT = \
+    @PROJECT_SOURCE_DIR@/core/include \
+    @PROJECT_SOURCE_DIR@/core/src
+
+RECURSIVE           = YES
+
+GENERATE_HTML       = YES
+HTML_OUTPUT         = html
+
+GENERATE_LATEX      = NO
+
+EXTRACT_PRIVATE     = NO
+EXTRACT_STATIC      = YES
+
+# Optional but recommended so undocumented classes still appear
+EXTRACT_ALL         = YES
+
+# If you want README.md as main page (must be inside INPUT!)
+USE_MDFILE_AS_MAINPAGE = @PROJECT_SOURCE_DIR@/README.md
