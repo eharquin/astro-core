@@ -52,7 +52,7 @@ case $PACKAGE_MANAGER in
     dnf)
         echo "Detected Fedora/RHEL-based system"
         echo "Installing build essentials..."
-        sudo dnf install -y gcc-c++ CMake ninja-build
+        sudo dnf install -y gcc-c++ cmake ninja-build
 
         echo "Installing GLFW..."
         sudo dnf install -y glfw-devel

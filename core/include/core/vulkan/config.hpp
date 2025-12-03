@@ -6,6 +6,6 @@ constexpr bool enableValidationLayers = false;
 constexpr bool enableValidationLayers = true;
 #endif
 
-inline constexpr const char *validationLayers[] = {
-		"VK_LAYER_KHRONOS_validation"
+const std::vector<char const*> validationLayers = {
+	"VK_LAYER_KHRONOS_validation"
 };

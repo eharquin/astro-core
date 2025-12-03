@@ -6,28 +6,31 @@
 import vulkan_hpp;
 #endif
 
+#include <vector>
 
-namespace Core::Vulkan
-{
-class Instance
-{
-public:
-	Instance() = default;
+namespace Core::Vulkan {
+	class Instance {
+	public:
+		Instance() = default;
 
-	void create();
+		void create();
 
-private:
-	bool checkGLFWExtensionSupport(const std::vector<const char *> &requiredExtensions) const;
+	private:
+		static std::vector<const char *> getRequiredExtensions();
 
-	//
-	// bool checkValidationLayerSupport();
-	//
-	static std::vector<const char *> getRequiredExtensions();
+		[[nodiscard]] bool checkExtensionSupport(const std::vector<const char *> &requiredExtensions) const;
 
-	//
-	// std::vector<VkExtensionProperties> getInstanceExtensions();
+		[[nodiscard]] bool checkLayerSupport(const std::vector<const char *> &requiredLayers) const;
 
-	vk::raii::Context  _context;
-	vk::raii::Instance _instance = nullptr;
-};
+		static vk::Bool32 debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+		                                vk::DebugUtilsMessageTypeFlagsEXT type,
+		                                const vk::DebugUtilsMessengerCallbackDataEXT *
+		                                pCallbackData, void *);
+
+		void setupDebugMessenger();
+
+		vk::raii::Context _context;
+		vk::raii::Instance _instance = nullptr;
+		vk::raii::DebugUtilsMessengerEXT _debugMessenger = nullptr;
+	};
 } // namespace Core::Vulkan
