@@ -1,4 +1,4 @@
-# cmake/FindLinkVulkan.cmake
+# CMake/FindLinkVulkan.CMake
 
 # -----------------------------------------------------------
 # Function to find and link Vulkan SDK + glslc automatically
@@ -10,21 +10,21 @@ function(FindLinkVulkan TARGET ACCESS)
     if (Vulkan_FOUND)
         message(STATUS "[Vulkan] Include dir: ${Vulkan_INCLUDE_DIRS}")
         message(STATUS "[Vulkan] Library: ${Vulkan_LIBRARIES}")
-    else()
+    else ()
         message(FATAL_ERROR "[Vulkan] Vulkan SDK not found. Please install it.")
-    endif()
+    endif ()
 
     # Find glslc compiler (optional)
     find_program(GLSLC_EXECUTABLE NAMES glslc HINTS
-        "$ENV{VULKAN_SDK}/Bin"
-        "$ENV{VULKAN_SDK}/bin"
+            "$ENV{VULKAN_SDK}/Bin"
+            "$ENV{VULKAN_SDK}/bin"
     )
 
     if (GLSLC_EXECUTABLE)
         message(STATUS "[Vulkan] Found glslc: ${GLSLC_EXECUTABLE}")
-    else()
+    else ()
         message(WARNING "[Vulkan] glslc not found; shader compilation may fail.")
-    endif()
+    endif ()
 
     # Link Vulkan include dirs and libs
     target_include_directories(${TARGET} ${ACCESS} ${Vulkan_INCLUDE_DIRS})

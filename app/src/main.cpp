@@ -7,20 +7,19 @@
 
 int main()
 {
-    Core::AppSpec spec;
-    Core::App app(spec);
+	Core::AppSpec spec;
+	Core::App     app(spec);
+	app.pushLayer<HelloTriangleLayer>();
 
-    app.pushLayer<HelloTriangleLayer>();
+	try
+	{
+		app.run();
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 
-    try
-    {
-        app.run();
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
-
-    return 0;
+	return 0;
 }

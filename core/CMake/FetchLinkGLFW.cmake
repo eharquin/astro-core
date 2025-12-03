@@ -1,4 +1,4 @@
-# cmake/FetchLinkGLFW.cmake
+# CMake/FetchLinkGLFW.CMake
 include(FetchContent)
 
 # -------------------------
@@ -10,7 +10,7 @@ function(FetchLinkGLFW TARGET ACCESS)
     FetchContent_Declare(
             glfw
             GIT_REPOSITORY https://github.com/glfw/glfw.git
-            GIT_TAG        3.4
+            GIT_TAG 3.4
     )
 
     FetchContent_MakeAvailable(glfw)

@@ -1,27 +1,33 @@
 #pragma once
 
-#include <vector>
+#if defined(__INTELLISENSE__) || !defined(USE_CPP20_MODULES)
+#include <vulkan/vulkan_raii.hpp>
+#else
+import vulkan_hpp;
+#endif
 
-#include <vulkan/vulkan.hpp>
 
+namespace Core::Vulkan
+{
+class Instance
+{
+public:
+	Instance() = default;
 
-namespace Core {
-namespace Vulkan {
+	void create();
 
-    class Instance {
-    public:
-        Instance();
-        ~Instance();
+private:
+	bool checkGLFWExtensionSupport(const std::vector<const char *> &requiredExtensions) const;
 
-    private:
-        void create();
-        void destroy();
+	//
+	// bool checkValidationLayerSupport();
+	//
+	static std::vector<const char *> getRequiredExtensions();
 
-        std::vector<const char*> getGLFWExtensions();
-        bool checkExtensions(std::vector<const char*> requiredExtensions);
-        std::vector<VkExtensionProperties> getInstanceExtensions();
-        VkInstance _instance;
-    };
+	//
+	// std::vector<VkExtensionProperties> getInstanceExtensions();
 
-} // namespace Vulkan
-} // namespace Core
+	vk::raii::Context  _context;
+	vk::raii::Instance _instance = nullptr;
+};
+} // namespace Core::Vulkan

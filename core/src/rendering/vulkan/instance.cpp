@@ -1,106 +1,143 @@
 #include <core/vulkan/instance.hpp>
 
+#include <algorithm>
+#include <stdexcept>
 #include <iostream>
+#include <string>
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-namespace Core {
-namespace Vulkan {
+namespace Core::Vulkan
+{
+bool Instance::checkGLFWExtensionSupport(const std::vector<const char *> &requiredExtensions) const
+{
+	bool foundAll = true;
+	// Check if the required GLFW extensions are supported by the Vulkan implementation.
+	auto extensionProperties = _context.enumerateInstanceExtensionProperties();
+	for (auto requiredExtension : requiredExtensions)
+	{
+		if (std::ranges::none_of(extensionProperties,
+		                         [requiredExtension](auto const &ext) {
+			                         return std::string_view(ext.extensionName) == requiredExtension;
+		                         }))
+		{
+			foundAll = false;
+			std::cerr << "[VULKAN Instance] Required extension not supported: " + std::string(requiredExtension) << std::endl;
+		}
+		else
+		{
+			std::cout << "[VULKAN Instance] Required extension found: " + std::string(requiredExtension) << std::endl;
+		}
+	}
 
-    Instance::Instance() {
-        create();
-    }
+	return foundAll;
+}
 
-    Instance::~Instance() {
-        destroy();
-    }
+void Instance::create()
+{
+	// if (enableValidationLayers && !checkValidationLayerSupport())
+	// 	throw std::runtime_error("validation layers requested, but not available!");
 
-    void Instance::destroy() {
-        vkDestroyInstance(_instance, nullptr);
-        _instance = nullptr;
-    }
+	constexpr vk::ApplicationInfo appInfo{
+		.pApplicationName = "Hello Triangle",
+		.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+		.pEngineName = "No Engine",
+		.engineVersion = VK_MAKE_VERSION(1, 0, 0),
+		.apiVersion = vk::ApiVersion14};
 
-    void Instance::create() {
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "astro-engine";
-        appInfo.pNext = nullptr; // optional
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "AstroEngine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_3; // tuto used 1_0
+	auto requiredExtensions = getRequiredExtensions();
+	if (!checkGLFWExtensionSupport(requiredExtensions))
+		throw std::runtime_error("Required extensions not supported");
 
-        // get required extensions
-        std::vector<const char*> requiredExtensions;
-        requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-        auto glfwExtensions = getGLFWExtensions();
-        requiredExtensions.insert(requiredExtensions.end(), glfwExtensions.begin(), glfwExtensions.end());
+	const vk::InstanceCreateInfo createInfo{
+		.pApplicationInfo = &appInfo,
+		.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
+		.ppEnabledExtensionNames = requiredExtensions.data()};
+	_instance = vk::raii::Instance(_context, createInfo);
+}
 
-        if(!checkExtensions(requiredExtensions))
-            throw std::runtime_error("extensions unvailable");
+std::vector<const char *> Instance::getRequiredExtensions()
+{
+	// Get GLFW extensions needed
+	uint32_t glfwExtensionCount = 0;
+	auto     glfwExtensions     = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+	std::vector<const char *> extensions{
+		glfwExtensions,
+		glfwExtensions + glfwExtensionCount
+	};
 
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pNext = nullptr; // optional
-        createInfo.pApplicationInfo = &appInfo;
-        createInfo.enabledExtensionCount =static_cast<uint32_t>(requiredExtensions.size());
-        createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-        createInfo.enabledLayerCount = 0;
-        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+	// Add EXT_DEBUG_UTILS extensions IF Validation Layers enable
+	if (true) //enableValidationLayers)
+		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	return extensions;
+}
 
-        if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS)
-            throw std::runtime_error("failed to create instance!");
-    }
-
-
-    std::vector<const char*> Instance::getGLFWExtensions() {
-        uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensionsNames = nullptr;
-        glfwExtensionsNames = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-        // initialize vector using input iterator
-        std::vector<const char*> extensions(glfwExtensionsNames, glfwExtensionsNames + glfwExtensionCount);
-        // if (enableValidationLayers)
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
-        return extensions;
-    }
-
-    std::vector<VkExtensionProperties> Instance::getInstanceExtensions() {
-        uint32_t extensionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-        std::vector<VkExtensionProperties> extensions(extensionCount);
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
-        return extensions;
-    }
-
-    bool Instance::checkExtensions(std::vector<const char*> requiredExtensions) {
-        // get available instance extensions
-        const auto instanceExtensions = getInstanceExtensions();
-
-        // Check each required extension
-        for (const char* required : requiredExtensions) {
-            bool found = false;
-            for (const auto& ext : instanceExtensions) {
-                if (std::string(ext.extensionName) == required) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                std::cerr << "Missing required extension: " << required << '\n';
-                return false; // fail early if any extension is missing
-            }
-        }
-
-        std::cout << "all required extensions have been found!" << std::endl;
-        return true;
-    }
-
-
-
-} // namespace Vulkan
-} // namespace Core
+//
+// std::vector<VkExtensionProperties> Instance::getInstanceExtensions() {
+// 	uint32_t extensionCount = 0;
+// 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+// 	std::vector<VkExtensionProperties> extensions(extensionCount);
+// 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
+// 	                                       extensions.data());
+//
+// 	return extensions;
+// }
+//
+// bool Instance::checkExtensionSupport(
+// 		std::vector<const char *> requiredExtensions) {
+// 	// get available instance extensions
+// 	const auto instanceExtensions = getInstanceExtensions();
+//
+// 	// Check each required extension
+// 	for (const char *required: requiredExtensions) {
+// 		bool found = false;
+// 		for (const auto &ext: instanceExtensions) {
+// 			if (std::string(ext.extensionName) == required) {
+// 				found = true;
+// 				break;
+// 			}
+// 		}
+//
+// 		if (!found) {
+// 			std::cerr << "Missing required extension: " << required << '\n';
+// 			return false; // fail early if any extension is missing
+// 		}
+// 	}
+//
+// 	std::cout << "all required extensions have been found!" << std::endl;
+// 	return true;
+// }
+//
+// bool Instance::checkValidationLayerSupport() {
+// 	// get available layers
+// 	uint32_t layerCount;
+// 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+//
+// 	std::vector<VkLayerProperties> availableLayers(layerCount);
+// 	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+//
+// 	for (const auto &layerProperties: availableLayers) {
+// 		std::cout << layerProperties.layerName << std::endl;
+// 	}
+//
+// 	for (const auto layerName: validationLayers) {
+// 		bool layerFound = false;
+//
+// 		for (const auto &layerProperties: availableLayers) {
+// 			if (std::string(layerName) == layerProperties.layerName) {
+// 				layerFound = true;
+// 				break;
+// 			}
+// 		}
+//
+// 		if (!layerFound) {
+// 			std::cerr << "Validation layer not found: " << layerName << '\n';
+// 			return false;
+// 		}
+// 	}
+//
+// 	return true;
+// }
+} // namespace Core::Vulkan

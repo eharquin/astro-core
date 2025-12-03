@@ -1,4 +1,4 @@
-# cmake/FetchLinkIMGUI.cmake
+# CMake/FetchLinkIMGUI.CMake
 include(FetchContent)
 
 # -------------------------
@@ -10,7 +10,7 @@ function(FetchLinkIMGUI TARGET ACCESS)
     FetchContent_Declare(
             imgui
             GIT_REPOSITORY https://github.com/ocornut/imgui.git
-            GIT_TAG        v1.92.4-docking
+            GIT_TAG v1.92.4-docking
     )
 
     FetchContent_MakeAvailable(imgui)
