@@ -29,8 +29,8 @@ void App::initWindow()
 
 void App::initVulkan()
 {
-	std::cout << "[VULKAN] Creating Instance object" << std::endl;
-	_instance.create();
+	std::cout << "[VULKAN] Creating context" << std::endl;
+	_context.create();
 }
 
 void App::mainloop()

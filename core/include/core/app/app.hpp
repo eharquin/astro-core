@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <core/window/window.hpp>
-#include <core/vulkan/instance.hpp>
+#include <core/vulkan/context.hpp>
 
 #include "layer.hpp"
 
@@ -114,6 +114,6 @@ private:
 	// --- Vulkan -----------------------------------------------------------
 
 	/// Vulkan instance used by the application.
-	Vulkan::Instance _instance;
+	Vulkan::Context _context;
 };
 }
