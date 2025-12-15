@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include <core/window/glfwContext.hpp>
 #include <core/window/window.hpp>
 #include <core/vulkan/context.hpp>
 
@@ -12,6 +13,9 @@
 
 namespace Core
 {
+
+static GLFWContext glfwContext;
+
 /**
  * @brief Specification used to configure an application instance.
  *
@@ -115,5 +119,6 @@ private:
 
 	/// Vulkan instance used by the application.
 	Vulkan::Context _context;
+
 };
 }

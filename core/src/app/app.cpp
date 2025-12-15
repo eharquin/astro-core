@@ -22,15 +22,19 @@ void App::run()
 
 void App::initWindow()
 {
-	std::cout << "[WINDOW] Creating GLFW object" << std::endl;
 	_window = std::make_shared<Window>(_spec.windowSpec);
-	_window->create();
+
+	std::cout << "[ASTRO CORE] [APP] [INIT] Window (GLFW) created"
+				<< "(w=" << _spec.windowSpec.width
+				<< ", h=" << _spec.windowSpec.height << ")"
+				<< std::endl;
 }
 
 void App::initVulkan()
 {
-	std::cout << "[VULKAN] Creating context" << std::endl;
-	_context.create();
+	_context.create(*_window);
+
+	std::cout << "[ASTRO CORE] [APP] [INIT] Vulkan context initialized (validation_layer=ON)" << std::endl;
 }
 
 void App::mainloop()
@@ -50,17 +54,20 @@ void App::mainloop()
 		for (const auto &layer : _layers)
 			layer->onUpdate(deltaTime);
 
+		_context.drawFrame(*_window);
+
 		// NOTE: rendering can be done elsewhere (eg. render thread)
 		for (const auto &layer : _layers)
 			layer->onRender();
 
 		_window->update();
 	}
+
+	_context.stop();
 }
 
 void App::cleanup()
 {
-	_window->destroy();
 }
 
 float App::time()

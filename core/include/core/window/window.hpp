@@ -2,41 +2,84 @@
 
 #include "inputState.hpp"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+
+#include <string>
+#include <string_view>
+#include <cstdint>
 
 #include <glm/glm.hpp>
 
-#include <string>
-#include <thread>
+#include <core/window/eventQueue.hpp>
+
+struct GLFWwindow; // forward declaration
 
 namespace Core {
 
 struct WindowSpec {
-    int width = 1280;
+    int width  = 1280;
     int height = 720;
-    std::string title;
-    bool isResizable = true;
-    bool vsync = true;
+
+    std::string title = "Window";
+
+    bool resizable = true;
+};
+
+struct WindowState {
+    glm::vec2 framebufferSize{0, 0};
+    glm::vec2 lastFramebufferSize{0, 0};
+
+    glm::vec2 windowSize{0, 0};
+    glm::vec2 windowPosition{0, 0};
+
+    float contentScale = 1.0f;
+
+    bool focused   = true;
+    bool minimized = false;
+    bool maximized = false;
+
+    bool framebufferResized = false;
 };
 
 class Window {
 public:
-    Window(const WindowSpec& spec = WindowSpec());
+    explicit Window(const WindowSpec& spec = WindowSpec());
     ~Window();
 
-    void create();
-    void destroy();
-    void update();
-    void pollEvents();
+    // ---- not copyable ----
+    Window(const Window&) = delete;
+    Window& operator=(const Window&) = delete;
 
-    bool shouldClose();
-    glm::vec2 frameBufferSize();
-    GLFWwindow* handle() const { return _handle; };
+    // ---- movable ----
+    Window(Window&& other) noexcept;
+    Window& operator=(Window&& other) noexcept;
+
+    void update();
+    void pollEvents() const;
+
+    [[nodiscard]] bool shouldClose() const noexcept;
+    [[nodiscard]] bool isMinimized() const noexcept;
+    [[nodiscard]] bool isFocused() const noexcept;
+
+    void setTitle(std::string_view title);
+
+    [[nodiscard]] glm::vec2 framebufferSize() const noexcept;
+
+    [[nodiscard]] bool framebufferResized() const noexcept;
+    void resetFramebufferResized() noexcept;
+
+    [[nodiscard]] void* nativeHandle() const noexcept { return _glfwHandle; }
+    [[nodiscard]] GLFWwindow* glfwHandle() const noexcept { return _glfwHandle; }
 
 private:
     WindowSpec _spec;
-    GLFWwindow* _handle = nullptr;
+    GLFWwindow* _glfwHandle = nullptr;
+    EventQueue _events;
+    WindowState _state;
+
+    static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+    static void windowFocusCallback(GLFWwindow* window, int focused);
+    static void windowIconifyCallback(GLFWwindow* window, int iconified);
+    static void windowCloseCallback(GLFWwindow* window);
 };
 
 }
