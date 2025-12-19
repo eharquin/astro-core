@@ -3,13 +3,13 @@
 
 #include <core/app/app.hpp>
 
-#include "helloTriangleLayer.hpp"
+#include "simpleModelLayer.hpp"
 
 int main()
 {
 	Core::AppSpec spec;
 	Core::App     app(spec);
-	app.pushLayer<HelloTriangleLayer>();
+	app.pushLayer<SimpleModelLayer>();
 
 	try
 	{

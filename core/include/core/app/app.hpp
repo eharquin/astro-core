@@ -6,7 +6,7 @@
 
 #include <core/window/glfwContext.hpp>
 #include <core/window/window.hpp>
-#include <core/vulkan/context.hpp>
+#include <core/rendering/vulkan/context.hpp>
 
 #include "layer.hpp"
 

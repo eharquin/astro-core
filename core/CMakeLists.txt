@@ -17,6 +17,7 @@ endif ()
 
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(tinyobjloader REQUIRED)
 
 find_package(Vulkan REQUIRED)
 include(EnableVulkanModule)
@@ -28,7 +29,11 @@ file(GLOB_RECURSE CORE_HEADERS include/*.hpp)
 add_library(${PROJECT_NAME} STATIC ${CORE_SOURCES} ${CORE_HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
-target_link_libraries(${PROJECT_NAME} Vulkan::cppm glfw)
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE Vulkan::cppm
+        PRIVATE glfw
+        PRIVATE tinyobjloader)
+
 
 if (ENABLE_CPP20_MODULE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE USE_CPP20_MODULES=1)

@@ -1,7 +1,7 @@
 //
 // Created by eharquin on 12/13/25.
 //
-#include <core/utils/file_utils.hpp>
+#include <core/utils/fileUtils.hpp>
 
 #include <fstream>
 
