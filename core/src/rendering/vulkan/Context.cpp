@@ -3,7 +3,7 @@
 //
 
 
-#include <core/rendering/vulkan/context.hpp>
+#include <core/rendering/vulkan/Context.hpp>
 
 #include <algorithm>
 #include <stdexcept>
@@ -15,12 +15,12 @@
 #include <numeric>
 #include <GLFW/glfw3.h>
 
-#include <core/utils/fileUtils.hpp>
-#include <core/utils/imageUtils.hpp>
+#include <core/utils/FileUtils.hpp>
+#include <core/utils/ImageUtils.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
-namespace Core::Vulkan {
+namespace Core::Rendering::Vulkan {
 
 	void Context::create(const Window & window) {
 		createInstance();
@@ -28,7 +28,11 @@ namespace Core::Vulkan {
 		createSurface(window);
 		pickPhysicalDevice();
 		createLogicalDevice();
-		createSwapChain(window);
+
+		int width = window.width();
+		int height = window.height();
+
+		createSwapChain(width,height);
 		createImageViews();
 		createCommandPool();
 		createDescriptorSetLayout();
@@ -47,7 +51,7 @@ namespace Core::Vulkan {
 		createSyncObjects();
 	}
 
-	void Context::drawFrame(Window & window) {
+	void Context::drawFrame(int width, int height) {
 
 		// Note: inFlightFences, presentCompleteSemaphores, and commandBuffers are indexed by frameIndex,
 		//       while renderFinishedSemaphores is indexed by imageIndex
@@ -57,7 +61,7 @@ namespace Core::Vulkan {
 		auto [result, imageIndex] = _swapChain.acquireNextImage( UINT64_MAX, *_presentCompleteSemaphores[_frameIndex], nullptr );
 
 		if (result == vk::Result::eErrorOutOfDateKHR) {
-			recreateSwapChain(window);
+			recreateSwapChain(width, height);
 			std::cout << "Swap chain recreated due to eErrorOutOfDateKHR during acquireNextImage.\n";
 			return;
 		}
@@ -92,11 +96,11 @@ namespace Core::Vulkan {
 													.pSwapchains        = &*_swapChain,
 													.pImageIndices      = &imageIndex};
 			result = _graphicsQueue.presentKHR(presentInfoKHR);
-			if (result == vk::Result::eSuboptimalKHR || window.framebufferResized())
+			if (result == vk::Result::eSuboptimalKHR || _shouldRecreateSwapChain)
 			{
 				std::cout << "Swap chain recreated due to eSuboptimalKHR or window resize during presentKHR.\n";
-				window.resetFramebufferResized();
-				recreateSwapChain(window);
+				_shouldRecreateSwapChain = false;
+				recreateSwapChain(width, height);
 			}
 			else if (result != vk::Result::eSuccess)
 				throw std::runtime_error("failed to present swap chain image!");
@@ -106,7 +110,7 @@ namespace Core::Vulkan {
 			if (e.code().value() == static_cast<int>(vk::Result::eErrorOutOfDateKHR))
 			{
 				std::cout << "Swap chain recreated due to eErrorOutOfDateKHR exception during presentKHR.\n";
-				recreateSwapChain(window);
+				recreateSwapChain(width, height);
 				return;
 			}
 			else
@@ -396,7 +400,7 @@ namespace Core::Vulkan {
 	// endregion
 
 	// region Swap Chain
-	void Context::createSwapChain(const Window & window) {
+	void Context::createSwapChain(int width, int height) {
 		auto chooseSwapSurfaceFormat = [](const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
 			for (const auto& f : availableFormats) {
 				if (f.format == vk::Format::eB8G8R8A8Srgb &&
@@ -410,11 +414,8 @@ namespace Core::Vulkan {
 			}
 			return vk::PresentModeKHR::eFifo;
 		};
-		auto chooseSwapExtent = [&window](const vk::SurfaceCapabilitiesKHR& capabilities) {
+		auto chooseSwapExtent = [width, height](const vk::SurfaceCapabilitiesKHR& capabilities) {
 			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) return capabilities.currentExtent;
-
-			int width, height;
-			glfwGetFramebufferSize(window.glfwHandle(), &width, &height);
 
 			return vk::Extent2D{
 				std::clamp<uint32_t>(width,  capabilities.minImageExtent.width,  capabilities.maxImageExtent.width),
@@ -468,17 +469,18 @@ namespace Core::Vulkan {
 		_swapChain = nullptr;
 	}
 
-	void Context::recreateSwapChain(const Window & window) {
-		while (window.isMinimized())
-			window.pollEvents();
-
+	void Context::recreateSwapChain(int width, int height) {
 		_device.waitIdle();
 
 		cleanupSwapChain();
 
-		createSwapChain(window);
+		createSwapChain(width,height);
 		createImageViews();
 		createDepthResources();
+	}
+
+	void Context::shouldRecreateSwapChain() {
+		_shouldRecreateSwapChain = true;
 	}
 
 	// endregion
@@ -520,7 +522,7 @@ namespace Core::Vulkan {
 	}
 
 	void Context::createGraphicsPipeline() {
-		const vk::raii::ShaderModule shaderModule = createShaderModule(readFile("../../shaders/slang.spv"));
+		const vk::raii::ShaderModule shaderModule = createShaderModule(Utils::readFile("../../shaders/slang.spv"));
 
 		vk::PipelineShaderStageCreateInfo vertShaderStageInfo{
 			.stage = vk::ShaderStageFlagBits::eVertex,
@@ -688,7 +690,7 @@ namespace Core::Vulkan {
 
 	// region Texture Image
 	void Context::createTextureImage() {
-		auto image = Core::readImage("../../textures/texture.jpg");
+		auto image = Utils::readImage("../../textures/texture.jpg");
 		vk::DeviceSize imageSize = image.width * image.height * sizeof(image.pixels[0]);
 
 		vk::raii::Buffer       stagingBuffer({});

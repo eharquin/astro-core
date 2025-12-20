@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include <core/window/glfwContext.hpp>
-#include <core/window/window.hpp>
-#include <core/rendering/vulkan/context.hpp>
+#include <core/window/GLFWContext.hpp>
+#include <core/window/Window.hpp>
+#include <core/rendering/vulkan/Context.hpp>
 
-#include "layer.hpp"
+#include "Layer.hpp"
 
 
 namespace Core
@@ -118,7 +118,7 @@ private:
 	// --- Vulkan -----------------------------------------------------------
 
 	/// Vulkan instance used by the application.
-	Vulkan::Context _context;
+	Rendering::Vulkan::Context _context;
 
 };
 }

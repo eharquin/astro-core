@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace Core {
+namespace Core::Utils {
 
 	struct ImageData {
 		int width;

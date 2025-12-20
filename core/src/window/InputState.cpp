@@ -1,4 +1,4 @@
-#include <core/window/inputState.hpp>
+#include <core/window/InputState.hpp>
 
 void InputState::reset()
 {

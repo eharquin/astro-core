@@ -1,11 +1,11 @@
 //
 // Created by eharquin on 12/13/25.
 //
-#include <core/utils/fileUtils.hpp>
+#include <core/utils/FileUtils.hpp>
 
 #include <fstream>
 
-std::vector<char> Core::readFile(const std::string& filename) {
+std::vector<char> Core::Utils::readFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
 	if (!file.is_open())

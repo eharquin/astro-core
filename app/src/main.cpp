@@ -1,15 +1,15 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <core/app/app.hpp>
+#include <core/app/App.hpp>
 
-#include "simpleModelLayer.hpp"
+#include "SimpleModelLayer.hpp"
 
 int main()
 {
 	Core::AppSpec spec;
 	Core::App     app(spec);
-	app.pushLayer<SimpleModelLayer>();
+	// app.pushLayer<SimpleModelLayer>();
 
 	try
 	{

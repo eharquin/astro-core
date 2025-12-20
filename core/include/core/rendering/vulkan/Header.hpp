@@ -10,7 +10,7 @@
 import vulkan_hpp;
 #endif
 
-namespace Core::Vulkan {
+namespace Core::Rendering::Vulkan {
 #ifdef NDEBUG
 	constexpr bool enableValidationLayers = false;
 #else

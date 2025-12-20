@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <core/rendering/vulkan.hpp>
-#include <core/rendering/vulkan/vertex.hpp>
+#include <core/rendering/vulkan/Header.hpp>
+#include <core/rendering/vulkan/Vertex.hpp>
 
-#include <core/window/window.hpp>
+#include <core/window/Window.hpp>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -17,7 +17,7 @@
 #include <optional>
 #include <chrono>
 
-namespace Core::Vulkan {
+namespace Core::Rendering::Vulkan {
 	const std::vector<const char *> validationLayers = {
 		"VK_LAYER_KHRONOS_validation",
 	};
@@ -70,9 +70,13 @@ namespace Core::Vulkan {
 
 		void create(const Window & window);
 
-		void drawFrame(Window & window);
+		void drawFrame(int width, int height);
 
 		void stop();
+
+		void shouldRecreateSwapChain();
+
+	private:
 
 		struct QueueFamilyIndices {
 			std::optional<uint32_t> graphicsFamily;
@@ -81,7 +85,6 @@ namespace Core::Vulkan {
 			bool isComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 		};
 
-	private:
 		void createInstance();
 
 		static std::vector<const char *> getRequiredExtensions();
@@ -108,11 +111,12 @@ namespace Core::Vulkan {
 
 		void createSurface(const Window & window);
 
-		void createSwapChain(const Window & window);
+		void createSwapChain(int width, int height);
 
 		void cleanupSwapChain();
 
-		void recreateSwapChain(const Window & window);
+		void recreateSwapChain(int width, int height);
+
 
 		void createImageViews();
 
@@ -214,6 +218,7 @@ namespace Core::Vulkan {
 		vk::raii::SwapchainKHR _swapChain = nullptr;
 		std::vector<vk::Image>  _swapChainImages;
 		std::vector<vk::raii::ImageView> _swapChainImageViews;
+		bool _shouldRecreateSwapChain = false;
 
 		// Graphics Pipeline
 		vk::raii::PipelineLayout _pipelineLayout = nullptr;

@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-#include <core/window/events.hpp>
+#include <core/window/Events.hpp>
 
 namespace Core {
 

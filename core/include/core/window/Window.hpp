@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inputState.hpp"
+#include "InputState.hpp"
 
 
 #include <string>
@@ -9,7 +9,7 @@
 
 #include <glm/glm.hpp>
 
-#include <core/window/eventQueue.hpp>
+#include <core/window/EventQueue.hpp>
 
 struct GLFWwindow; // forward declaration
 
@@ -44,6 +44,14 @@ class Window {
 public:
     explicit Window(const WindowSpec& spec = WindowSpec());
     ~Window();
+
+    [[nodiscard]] int width() const {
+        return _spec.width;
+    }
+
+    [[nodiscard]] int height() const {
+        return _spec.height;
+    }
 
     // ---- not copyable ----
     Window(const Window&) = delete;

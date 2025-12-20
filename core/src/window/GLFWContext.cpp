@@ -4,7 +4,7 @@
 
 // glfw_context.cpp
 
-#include <core/window/glfwContext.hpp>
+#include <core/window/GLFWContext.hpp>
 
 #include <GLFW/glfw3.h>
 #include <iostream>

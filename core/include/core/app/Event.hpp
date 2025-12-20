@@ -2,7 +2,7 @@
 
 namespace Core {
 
-    class event {
+    class Event {
 
     };
 }

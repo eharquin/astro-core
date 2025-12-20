@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace Core {
+namespace Core::Utils {
 	template<typename V>
 	struct ModelData {
 		std::vector<V> vertices;

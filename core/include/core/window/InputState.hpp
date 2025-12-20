@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.hpp"
+#include "Input.hpp"
 
 class InputState {
 public:

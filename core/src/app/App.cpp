@@ -1,4 +1,4 @@
-#include <core/app/app.hpp>
+#include <core/app/App.hpp>
 
 #include <iostream>
 
@@ -54,7 +54,7 @@ void App::mainloop()
 		for (const auto &layer : _layers)
 			layer->onUpdate(deltaTime);
 
-		_context.drawFrame(*_window);
+		_context.drawFrame(_window->width(), _window->height());
 
 		// NOTE: rendering can be done elsewhere (eg. render thread)
 		for (const auto &layer : _layers)

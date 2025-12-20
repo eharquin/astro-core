@@ -1,5 +1,5 @@
 #include <iostream>
-#include <core/window/window.hpp>
+#include <core/window/Window.hpp>
 
 #include <stdexcept>
 #include <string>

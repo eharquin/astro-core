@@ -2,7 +2,7 @@
 // Created by eharquin on 12/17/25.
 //
 
-#include <core/utils/imageUtils.hpp>
+#include <core/utils/ImageUtils.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -10,13 +10,13 @@
 #include <cstring>
 #include <stdexcept>
 
-Core::ImageData Core::readImage(const std::string &filename) {
+Core::Utils::ImageData Core::Utils::readImage(const std::string &filename) {
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	if (!pixels)
 		throw std::runtime_error("failed to load texture image!");
 
-	Core::ImageData imageData;
+	Core::Utils::ImageData imageData;
 	imageData.width = texWidth;
 	imageData.height = texHeight;
 	imageData.channels = texChannels;
