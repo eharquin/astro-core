@@ -5,8 +5,9 @@
 namespace Core
 {
 App::App(const AppSpec &spec) :
-	_spec(spec)
-{}
+	_spec(spec) {
+	_app = this;
+}
 
 App::~App()
 {}
@@ -15,7 +16,7 @@ void App::run()
 {
 	_running = true;
 	initWindow();
-	initVulkan();
+	initGraphics();
 	mainloop();
 	cleanup();
 }
@@ -30,15 +31,27 @@ void App::initWindow()
 				<< std::endl;
 }
 
-void App::initVulkan()
+void App::initGraphics()
 {
-	_context.create(*_window);
+	// Create graphics context based on spec
+	_context = Rendering::createContext(_spec.graphicsAPI);
+	if (!_context)
+		throw std::runtime_error("Failed to create graphics context");
 
-	std::cout << "[ASTRO CORE] [APP] [INIT] Vulkan context initialized (validation_layer=ON)" << std::endl;
+	// Initialize context with the window
+	_context->init(*_window);
+
+	// Create renderer
+	_renderer = _context->createRenderer(*_window);
+	_renderer->init();
 }
 
 void App::mainloop()
 {
+	for (auto& layer : _layers)
+		layer->onAttach(); // une seule fois après initGraphics
+
+
 	float lastTime = time();
 	while (_running)
 	{
@@ -54,7 +67,7 @@ void App::mainloop()
 		for (const auto &layer : _layers)
 			layer->onUpdate(deltaTime);
 
-		_context.drawFrame(_window->width(), _window->height());
+		_renderer->drawFrame();
 
 		// NOTE: rendering can be done elsewhere (eg. render thread)
 		for (const auto &layer : _layers)
@@ -63,7 +76,8 @@ void App::mainloop()
 		_window->update();
 	}
 
-	_context.stop();
+	_renderer->shutdown();
+	_context->shutdown();
 }
 
 void App::cleanup()

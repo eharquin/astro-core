@@ -9,7 +9,7 @@ int main()
 {
 	Core::AppSpec spec;
 	Core::App     app(spec);
-	// app.pushLayer<SimpleModelLayer>();
+	app.pushLayer<SimpleModelLayer>();
 
 	try
 	{

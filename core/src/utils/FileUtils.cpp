@@ -5,11 +5,11 @@
 
 #include <fstream>
 
-std::vector<char> Core::Utils::readFile(const std::string& filename) {
-	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+std::vector<char> Core::Utils::readFile(const std::string& filePath) {
+	std::ifstream file(filePath, std::ios::ate | std::ios::binary);
 
 	if (!file.is_open())
-		throw std::runtime_error("failed to open file : " + filename);
+		throw std::runtime_error("failed to open file : " + filePath);
 
 	std::vector<char> buffer(file.tellg());
 

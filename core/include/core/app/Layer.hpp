@@ -7,6 +7,7 @@ class Layer {
   public:
 	virtual ~Layer() = default;
 
+	virtual void onAttach() {}
 	virtual void onEvent(Event &event) {}
 	virtual void onUpdate(float dt) {}
 	virtual void onRender() {}

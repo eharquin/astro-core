@@ -1,22 +1,26 @@
 #pragma once
 
+#include <core/app/App.hpp>
 #include <core/app/Layer.hpp>
 
 
-#include <core/rendering/Renderer.hpp>
+#include <core/rendering/IRenderer.hpp>
 #include <core/rendering/Model.hpp>
 
+#include "core/utils/ModelUtils.hpp"
 
-class SimpleModelLayer : public Core::Layer {
+using namespace Core;
+
+class SimpleModelLayer : public Layer {
 public:
-	SimpleModelLayer(Core::Rendering::IRenderer& renderer)
-		: _renderer(renderer) {
+	SimpleModelLayer() = default;
 
-		const auto model = Core::Rendering::Model("../../models/viking_room/viking_room.obj","../../models/viking_room/viking_room.png");
-		_renderer.addRenderable(model);
+	void onAttach() override {
+		auto renderer = Core::App::instance()->renderer();
+
+		auto model = Utils::loadModel("../../models/viking_room/viking_room.obj");
+		auto meshID = renderer->createMesh(model.vertices, model.indices);
+		auto textureID = renderer->createTexture("../../models/viking_room/viking_room.png");
+		renderer->addInstance(meshID, textureID);
 	}
-
-
-private:
-	Core::Rendering::IRenderer& _renderer;
 };

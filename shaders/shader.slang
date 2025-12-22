@@ -1,21 +1,33 @@
-struct VSInput {
-    float3 inPos;
-    float3 inColor;
-    float2 inTexCoord;
-};
+#define MAX_TEXTURES 256
+
+// ==========================
+// Uniform buffer
+// ==========================
 
 struct UniformBuffer {
     float4x4 model;
     float4x4 view;
     float4x4 proj;
 };
+
+[[vk::binding(0, 0)]]
 ConstantBuffer<UniformBuffer> ubo;
 
-struct VSOutput
-{
-    float4 pos : SV_Position;
-    float3 fragColor;
-    float2 fragTexCoord;
+// ==========================
+// Vertex stage
+// ==========================
+
+struct VSInput {
+    float3 inPos      : POSITION;
+    float3 inColor    : COLOR;
+    float3 inNormal   : NORMAL;
+    float2 inTexCoord : TEXCOORD0;
+};
+
+struct VSOutput {
+    float4 pos          : SV_Position;
+    float3 fragColor    : COLOR;
+    float2 fragTexCoord : TEXCOORD0;
 };
 
 [shader("vertex")]
@@ -27,10 +39,38 @@ VSOutput vertMain(VSInput input) {
     return output;
 }
 
-Sampler2D texture;
+// ==========================
+// Push constants
+// ==========================
+
+struct PushConstants {
+    uint textureIndex;
+};
+
+[[vk::push_constant]]
+ConstantBuffer<PushConstants> pc;
+
+// ==========================
+// Combined image samplers
+// ==========================
+
+[[vk::binding(1, 0)]]
+Texture2D<float4> uTextures[MAX_TEXTURES];
+
+[[vk::binding(1, 0)]]
+SamplerState uSampler;
+
+// ==========================
+// Fragment stage
+// ==========================
 
 [shader("fragment")]
 float4 fragMain(VSOutput vertIn) : SV_TARGET {
-    return texture.Sample(vertIn.fragTexCoord);
-   //return float4(vertIn.fragTexCoord, 0.0, 1.0);
+    float4 texColor =
+        uTextures[pc.textureIndex].Sample(
+            uSampler,
+            vertIn.fragTexCoord
+        );
+
+    return texColor;
 }
