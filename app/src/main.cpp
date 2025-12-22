@@ -5,10 +5,12 @@
 
 #include "SimpleModelLayer.hpp"
 
+using namespace Core::App;
+
 int main()
 {
-	Core::AppSpec spec;
-	Core::App     app(spec);
+	AppSpec spec;
+	App     app(spec);
 	app.pushLayer<SimpleModelLayer>();
 
 	try

@@ -38,18 +38,22 @@ endif()
 include(EnableVulkanModule)
 enable_vulkan_module(ENABLE_CPP20_MODULE) # Expose Vulkan::cppm, use ENABLE_CPP20_MODULE
 
-file(GLOB_RECURSE CORE_SOURCES src/*.cpp)
-file(GLOB_RECURSE CORE_HEADERS include/*.hpp)
+add_subdirectory(common)
+add_subdirectory(utils)
+add_subdirectory(window)
+add_subdirectory(rendering)
+add_subdirectory(app)
 
-add_library(${PROJECT_NAME} STATIC ${CORE_SOURCES} ${CORE_HEADERS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
+
+############################################
+# Core Library
+############################################
+add_library(${PROJECT_NAME} INTERFACE)
+
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE Vulkan::cppm
-        PRIVATE glfw
-        PRIVATE tinyobjloader)
+        INTERFACE core_app
+        INTERFACE core_window
+        INTERFACE core_rendering
+        INTERFACE core_utils
+)
 
-
-if (ENABLE_CPP20_MODULE)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_CPP20_MODULES=1)
-endif ()
