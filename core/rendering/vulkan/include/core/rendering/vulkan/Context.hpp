@@ -5,7 +5,8 @@
 #pragma once
 
 #include <core/rendering/vulkan/header.hpp>
-#include <core/window/Window.hpp>
+#include "core/window/IWindowContext.hpp"
+#include <core/window/IWindow.hpp>
 
 #include <core/rendering/IContext.hpp>
 
@@ -45,9 +46,9 @@ namespace Core::Rendering::Vulkan {
 		Context(Context &&) = delete;
 		Context &operator=(Context &&) = delete;
 
-		void init(const Window & window) override;
+		void init(Window::IWindowContext &windowContext, const Window::IWindow& window) override;
 		void shutdown() override;
-		std::unique_ptr<IRenderer> createRenderer(Window &window) override;
+		std::unique_ptr<IRenderer> createRenderer(const Window::IWindow &window) override;
 
 	protected:
 		vk::raii::Instance &instance() {return _instance;}
@@ -62,11 +63,11 @@ namespace Core::Rendering::Vulkan {
 		void waitIdle();
 
 	private:
-		void create(const Window & window);
+		void create(Window::IWindowContext &windowContext, const Window::IWindow& window);
 
-		void createInstance();
+		void createInstance(Window::IWindowContext &windowContext);
 
-		static std::vector<const char *> getRequiredExtensions();
+		static std::vector<const char *> getRequiredExtensions(Window::IWindowContext &windowContext);
 
 		[[nodiscard]] bool checkExtensionSupport(const std::vector<const char *> &requiredExtensions) const;
 
@@ -85,7 +86,7 @@ namespace Core::Rendering::Vulkan {
 		                                            const vk::raii::SurfaceKHR &surface);
 		void createLogicalDevice();
 
-		void createSurface(const Window & window);
+		void createSurface(Window::IWindowContext &windowContext, const Window::IWindow& window);
 
 		void createCommandPool();
 

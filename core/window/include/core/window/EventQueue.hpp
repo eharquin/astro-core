@@ -4,20 +4,11 @@
 
 // event_queue.hpp
 #pragma once
-#include <variant>
 #include <vector>
 
 #include <core/window/Events.hpp>
 
 namespace Core {
-
-	using WindowEvent = std::variant<
-		WindowResizeEvent,
-		WindowMoveEvent,
-		WindowFocusEvent,
-		WindowMinimizeEvent,
-		WindowCloseEvent
-	>;
 
 	class EventQueue {
 	public:

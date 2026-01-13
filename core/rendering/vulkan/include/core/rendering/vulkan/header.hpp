@@ -17,3 +17,4 @@ namespace Core::Rendering::Vulkan {
 	constexpr bool enableValidationLayers = true;
 #endif
 }
+

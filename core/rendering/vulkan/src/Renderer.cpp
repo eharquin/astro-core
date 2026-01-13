@@ -3,6 +3,7 @@
 //
 
 #include <chrono>
+#include <cstring>
 #include <iostream>
 #include <core/rendering/vulkan/Renderer.hpp>
 #include <glm/ext/matrix_clip_space.hpp>

@@ -1,16 +1,16 @@
 #include <core/app/App.hpp>
 
-#include <iostream>
+#include <utility>
+
+#include "core/rendering/ContextFactory.hpp"
+#include "core/window/WindowFactory.hpp"
 
 namespace Core::App
 {
-App::App(const AppSpec &spec) :
-	_spec(spec) {
+App::App(AppSpec spec) :
+	_spec(std::move(spec)) {
 	_app = this;
 }
-
-App::~App()
-{}
 
 void App::run()
 {
@@ -23,27 +23,15 @@ void App::run()
 
 void App::initWindow()
 {
-	_window = std::make_shared<Window>(_spec.windowSpec);
-
-	std::cout << "[ASTRO CORE] [APP] [INIT] Window (GLFW) created"
-				<< "(w=" << _spec.windowSpec.width
-				<< ", h=" << _spec.windowSpec.height << ")"
-				<< std::endl;
+	_windowContext = Window::createWindowContext(_spec.windowSpec.api);
+	_window = _windowContext->createWindow(_spec.windowSpec);
 }
 
 void App::initGraphics()
 {
-	// Create graphics context based on spec
-	_context = createContext(_spec.graphicsAPI);
-	if (!_context)
-		throw std::runtime_error("Failed to create graphics context");
-
-	// Initialize context with the window
-	_context->init(*_window);
-
-	// Create renderer
-	_renderer = _context->createRenderer(*_window);
-	_renderer->init();
+	_graphicsContext = Rendering::createGraphicsContext(_spec.graphicsAPI);
+	_graphicsContext->init(*_windowContext, *_window);
+	_renderer = _graphicsContext->createRenderer(*_window);
 }
 
 void App::mainloop()
@@ -55,7 +43,7 @@ void App::mainloop()
 	float lastTime = time();
 	while (_running)
 	{
-		_window->pollEvents();
+		_windowContext->pollEvents();
 
 		if (_window->shouldClose())
 			_running = false;
@@ -77,7 +65,7 @@ void App::mainloop()
 	}
 
 	_renderer->shutdown();
-	_context->shutdown();
+	_graphicsContext->shutdown();
 }
 
 void App::cleanup()

@@ -4,6 +4,7 @@
 
 // window_events.hpp
 #pragma once
+#include <variant>
 #include <glm/glm.hpp>
 
 namespace Core {
@@ -25,5 +26,14 @@ namespace Core {
 	};
 
 	struct WindowCloseEvent {};
+
+	using WindowEvent = std::variant<
+		WindowResizeEvent,
+		WindowMoveEvent,
+		WindowFocusEvent,
+		WindowMinimizeEvent,
+		WindowCloseEvent
+	>;
+
 
 } // namespace Core

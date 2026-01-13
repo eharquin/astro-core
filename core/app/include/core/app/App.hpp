@@ -4,26 +4,27 @@
 #include <string>
 #include <vector>
 
-#include <core/window/GLFWContext.hpp>
-#include <core/window/Window.hpp>
-#include <core/app/api.hpp>
+#include <core/window/IWindowContext.hpp>
+#include <core/rendering/GraphicsAPI.hpp>
+#include <core/window/IWindow.hpp>
 
 #include "Layer.hpp"
+#include "core/rendering/IContext.hpp"
+#include "core/rendering/IRenderer.hpp"
 
 namespace Core::App
 {
-static GLFWContext g_glfwContext;
 
 struct AppSpec {
 	std::string name = "Application";
-	WindowSpec windowSpec;
-	GraphicsAPI graphicsAPI = GraphicsAPI::Vulkan;
+	Window::WindowSpec windowSpec;
+	Rendering::GraphicsAPI graphicsAPI = Rendering::GraphicsAPI::Vulkan;
 };
 
 class App {
 public:
-	App(const AppSpec &spec = AppSpec());
-	~App();
+	explicit App(AppSpec spec = AppSpec());
+	~App() = default;
 
 	void run();
 
@@ -46,8 +47,10 @@ private:
 
 	AppSpec _spec;
 
-	std::shared_ptr<Window> _window;
-	std::unique_ptr<Rendering::IContext> _context;
+	std::shared_ptr<Window::IWindowContext> _windowContext;
+	std::unique_ptr<Window::IWindow> _window;
+
+	std::unique_ptr<Rendering::IContext> _graphicsContext;
 	std::unique_ptr<Rendering::IRenderer> _renderer;
 
 	bool _running = false;

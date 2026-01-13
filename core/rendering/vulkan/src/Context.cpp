@@ -2,17 +2,19 @@
 // Created by eharquin on 12/20/25.
 //
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <core/rendering/vulkan/Context.hpp>
 #include "core/rendering/vulkan/Renderer.hpp"
 
+
 namespace Core::Rendering::Vulkan {
 
-	void Context::init(const Window &window)
+	void Context::init(Window::IWindowContext &windowContext, const Window::IWindow& window)
 	{
-		create(window);
+		create(windowContext, window);
 	}
 
 	void Context::shutdown() {
@@ -20,16 +22,16 @@ namespace Core::Rendering::Vulkan {
 			_device.waitIdle();
 	}
 
-	std::unique_ptr<IRenderer> Context::createRenderer(Window &window) {
+	std::unique_ptr<IRenderer> Context::createRenderer(const Window::IWindow &window) {
 		return std::make_unique<Renderer>(*this, window);
 	}
 
-	void Context::create(const Window &window) {
-		createInstance();
+	void Context::create(Window::IWindowContext &windowContext, const Window::IWindow& window) {
+		createInstance(windowContext);
 		if (enableValidationLayers)
 			setupDebugMessenger();
 
-		createSurface(window);
+		createSurface(windowContext, window);
 		pickPhysicalDevice();
 		createLogicalDevice();
 		createCommandPool();
@@ -215,12 +217,12 @@ namespace Core::Rendering::Vulkan {
 
 
 	// region Instance Creation
-	void Context::createInstance() {
+	void Context::createInstance(Window::IWindowContext &windowContext) {
 		vk::ApplicationInfo appInfo{
 			.pApplicationName = "Hello Triangle",
-			.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+			.applicationVersion = vk::makeVersion(1, 0, 0),
 			.pEngineName = "No Engine",
-			.engineVersion = VK_MAKE_VERSION(1, 0, 0),
+			.engineVersion = vk::makeVersion(1, 0, 0),
 			.apiVersion = vk::ApiVersion14
 		};
 
@@ -230,7 +232,7 @@ namespace Core::Rendering::Vulkan {
 		if (!checkLayerSupport(requiredLayers))
 			throw std::runtime_error("Required layers not supported");
 
-		auto requiredExtensions = getRequiredExtensions();
+		auto requiredExtensions = getRequiredExtensions(windowContext);
 		if (!checkExtensionSupport(requiredExtensions))
 			throw std::runtime_error("Required extensions not supported");
 
@@ -245,15 +247,13 @@ namespace Core::Rendering::Vulkan {
 		_instance = vk::raii::Instance(_context, createInfo);
 	}
 
-	std::vector<const char *> Context::getRequiredExtensions() {
+	std::vector<const char *> Context::getRequiredExtensions(Window::IWindowContext &windowContext) {
 		// Get GLFW extensions needed
 		uint32_t glfwExtensionCount = 0;
-		const auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		// const auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		const auto windowExtensions = windowContext.getVulkanRequiredExtensions();
 
-		std::vector<const char *> extensions{
-			glfwExtensions,
-			glfwExtensions + glfwExtensionCount
-		};
+		std::vector<const char *> extensions(windowExtensions.begin(), windowExtensions.end());
 
 		// Add EXT_DEBUG_UTILS extensions IF Validation Layers enable
 		if (enableValidationLayers)
@@ -337,7 +337,7 @@ namespace Core::Rendering::Vulkan {
 
 	// region Device
 	void Context::pickPhysicalDevice() {
-		if (_instance == nullptr)
+		if (!*_instance)
 			throw std::runtime_error("Vulkan instance not created");
 
 		auto devices = vk::raii::PhysicalDevices(_instance);
@@ -347,14 +347,18 @@ namespace Core::Rendering::Vulkan {
 		const auto devIter =
 				std::ranges::find_if(devices, [&](auto const &device) {
 					// Check for Vulkan 1.3 support
-					bool isSuitable = device.getProperties().apiVersion >= VK_API_VERSION_1_4;
+					bool isSuitable = device.getProperties().apiVersion >= vk::makeApiVersion(0, 1, 4, 0);
 
-					std::cout << "[ASTRO CORE] [VULKAN] [CHECK] device       : " <<
-							device.getProperties().deviceName << " API Version: " <<
-							VK_VERSION_MAJOR(device.getProperties().apiVersion) << "." <<
-							VK_VERSION_MINOR(device.getProperties().apiVersion) << "." <<
-							VK_VERSION_PATCH(device.getProperties().apiVersion) <<
-							(isSuitable ? "  OK" : "  NOK") << std::endl;
+					auto props = device.getProperties();
+					uint32_t api = props.apiVersion;
+
+					std::cout << "[ASTRO CORE] [VULKAN] [CHECK] device       : "
+							  << props.deviceName << " API Version: "
+							  << vk::apiVersionMajor(api) << "."
+							  << vk::apiVersionMinor(api) << "."
+							  << vk::apiVersionPatch(api)
+							  << (isSuitable ? "  OK" : "  NOK")
+							  << std::endl;
 
 					// Check for graphics queue support
 					auto queueFamilies = device.getQueueFamilyProperties();
@@ -418,7 +422,6 @@ namespace Core::Rendering::Vulkan {
 			if (indices.isComplete()) break;
 		}
 
-
 		if (!indices.isComplete())
 			throw std::runtime_error("failed to find required queue families!");
 
@@ -481,11 +484,14 @@ namespace Core::Rendering::Vulkan {
 	// endregion
 
 	// region Surface
-	void Context::createSurface(const Window & window) {
-		VkSurfaceKHR       surface0;
-		if (glfwCreateWindowSurface(*_instance, window.glfwHandle(), nullptr, &surface0) != 0) {
-			throw std::runtime_error("failed to create window surface!");
-		}
+	void Context::createSurface(Window::IWindowContext &windowContext, const Window::IWindow& window) {
+		// VkSurfaceKHR       surface0;
+		// if (glfwCreateWindowSurface(*_instance, window.glfwHandle(), nullptr, &surface0) != 0) {
+		// 	throw std::runtime_error("failed to create window surface!");
+		// }
+
+		const VkSurfaceKHR surface0 = windowContext.createVulkanSurface(*_instance, window);
+
 		_surface = vk::raii::SurfaceKHR(_instance, surface0);
 	}
 	// endregion

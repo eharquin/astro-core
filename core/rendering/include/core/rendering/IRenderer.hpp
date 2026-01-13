@@ -24,3 +24,5 @@ namespace Core::Rendering {
 		virtual void addInstance(MeshID mesh, uint32_t texture = 0) = 0;
 	};
 }
+
+
